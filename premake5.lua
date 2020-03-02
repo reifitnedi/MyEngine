@@ -1,13 +1,12 @@
 workspace "Engine"
 	architecture "x64"
-	
+		
 	configurations
 	{
 		"Debug",
 		"Release",
 		"Dist"
 	}
-	
 	
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
@@ -27,7 +26,8 @@ project "Engine"
 	
 	includedirs
 	{
-		"%{prj.name}/vendor/spdlog/include;"
+		"%{prj.name}/src",
+		"%{prj.name}/vendor/spdlog/include"
 	}
 	
 	filter "system:windows"
@@ -35,33 +35,28 @@ project "Engine"
 		staticruntime "On"
 		systemversion "latest"
 	
+		defines
+		{
+			"ENGINE_PLATFORM_WINDOWS",
+			"ENGINE_BUILD_DLL"
+		}
 	
-	defines
-	{
-		"ENGINE_PLATFORM_WINDOWS",
-		"ENGINE_BUILD_DLL"
-	}
+		postbuildcommands
+		{
+			("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox")
+		}
 	
-	
-	
-	postbuildcommands
-	{
-		("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox")
-	}
-	
-	
-	filter "Configurations:Debug"
+	filter "configurations:Debug"
 		defines "ENGINE_DEBUG"
 		symbols "On"
 	
-	filter "Configurations:Release"
+	filter "configurations:Release"
 		defines "ENGINE_RELEASE"
 		optimize "On"
 		
-	filter "Configurations:Dist"
+	filter "configurations:Dist"
 		defines "ENGINE_DIST"
 		optimize "On"
-	
 	
 project "Sandbox"
 	location "Sandbox"
@@ -71,10 +66,10 @@ project "Sandbox"
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("obj/" .. outputdir .. "/%{prj.name}")
 	
-	
 	files
 	{
-		"%{prj.name}/src/**"
+		"%{prj.name}/src/**.h",
+		"%{prj.name}/src/**.cpp"
 	}
 	
 	includedirs
@@ -93,21 +88,19 @@ project "Sandbox"
 		staticruntime "On"
 		systemversion "latest"
 	
+		defines
+		{
+			"ENGINE_PLATFORM_WINDOWS"
+		}
 	
-	defines
-	{
-		"ENGINE_PLATFORM_WINDOWS"
-	}
-	
-	
-	filter "Configurations:Debug"
+	filter "configurations:Debug"
 		defines "ENGINE_DEBUG"
 		symbols "On"
 	
-	filter "Configurations:Release"
+	filter "configurations:Release"
 		defines "ENGINE_RELEASE"
 		optimize "On"
 		
-	filter "Configurations:Dist"
+	filter "configurations:Dist"
 		defines "ENGINE_DIST"
 		optimize "On"
